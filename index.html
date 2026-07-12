@@ -808,7 +808,7 @@
     };
 
     // Auto-unmute on first interaction or scroll
-    const handleInteraction = () => {
+    const handleInteraction = (e) => {
       startAudio();
       // Unmute so user hears the audio right away
       // (the fade-in in startAudio() handles volume)
@@ -818,6 +818,8 @@
       iconOff.style.display = 'none';
       // Clean up all listeners
       document.removeEventListener('pointerdown', handleInteraction);
+      document.removeEventListener('touchend', handleInteraction);
+      document.removeEventListener('click', handleInteraction);
       lenis.off('scroll', handleLenisScroll);
     };
 
@@ -825,10 +827,14 @@
       if (!audioStarted) handleInteraction();
     };
 
-    // Listen on pointer down (covers click + tap on all devices)
+    // Listen on pointer down, touch end, and click (covers all devices)
     document.addEventListener('pointerdown', handleInteraction, { once: true });
+    document.addEventListener('touchend', handleInteraction, { once: true });
+    document.addEventListener('click', handleInteraction, { once: true });
     // Also hook into Lenis scroll (fires on wheel, touch, and programmatic scroll)
     lenis.on('scroll', handleLenisScroll);
+
+
 
     // Toggle mute/unmute
     toggleBtn.addEventListener('click', (e) => {

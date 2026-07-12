@@ -810,12 +810,8 @@
     // Auto-unmute on first interaction or scroll
     const handleInteraction = (e) => {
       startAudio();
-      // Unmute so user hears the audio right away
-      // (the fade-in in startAudio() handles volume)
-      isMuted = false;
-      bgAudio.muted = false;
-      iconOn.style.display = '';
-      iconOff.style.display = 'none';
+      // NOTE: Don't touch mute state here — the toggle button controls that.
+      // Audio stays muted until user deliberately clicks the toggle.
       // Clean up all listeners
       document.removeEventListener('pointerdown', handleInteraction);
       document.removeEventListener('touchend', handleInteraction);
@@ -836,22 +832,15 @@
 
 
 
-    // Toggle mute/unmute (only toggles — first start is handled by document listeners)
+    // Toggle mute/unmute
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
 
-      // If audio wasn't started yet (e.g. pointerdown missed), start it
+      // Ensure audio has started
       if (!audioStarted) {
         startAudio();
-        // First interaction — keep unmuted, don't toggle
-        isMuted = false;
-        bgAudio.muted = false;
-        iconOn.style.display = '';
-        iconOff.style.display = 'none';
-        return;
       }
 
-      // Normal toggle for subsequent clicks
       isMuted = !isMuted;
       bgAudio.muted = isMuted;
 

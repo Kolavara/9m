@@ -83,7 +83,6 @@
 
     /* ── Typography ── */
     .poem-text {
-      position: relative;
       max-width: 700px;
       width: 100%;
       font-size: clamp(2.2rem, 6vw, 3.8rem);
@@ -92,36 +91,6 @@
       letter-spacing: 0.01em;
       padding-left: clamp(2rem, 10vw, 8rem);
       padding-right: 2rem;
-      /* Ensure readability over video background */
-      text-shadow: 0 1px 3px rgba(255,255,255,0.12), 0 4px 12px rgba(255,255,255,0.08);
-    }
-
-    /* Semi-transparent overlay behind text for better readability on mobile */
-    .poem-text::before {
-      content: '';
-      position: absolute;
-      top: -0.5rem;
-      left: -0.5rem;
-      right: -0.5rem;
-      bottom: -0.5rem;
-      background: radial-gradient(
-        ellipse at center,
-        rgba(255,255,255,0.55) 0%,
-        rgba(255,255,255,0.15) 70%,
-        transparent 100%
-      );
-      border-radius: 1rem;
-      pointer-events: none;
-      z-index: -1;
-      opacity: 0;
-      transition: opacity 0.6s ease;
-    }
-
-    /* Show overlay only on mobile where readability is worse */
-    @media (max-width: 600px) {
-      .poem-text::before {
-        opacity: 1;
-      }
     }
 
     .poem-text .line {
@@ -227,32 +196,16 @@
       min-height: 120vh;
     }
 
-    @media (max-width: 600px) {
-      .poem-section {
-        padding: 1.5rem 1rem;
-      }
+    @media (max-width: 480px) {
       .poem-text {
-        padding-left: 0.5rem;
-        padding-right: 1rem;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
       }
       #section-1 .poem-text {
-        font-size: clamp(2.4rem, 9vw, 3.6rem);
+        font-size: clamp(2.6rem, 10vw, 3.8rem);
       }
       #s6-l2 {
-        font-size: clamp(2.4rem, 9vw, 3.8rem);
-      }
-      /* Smaller spacers on mobile — too much empty scrolling */
-      .spacer {
-        height: 25vh;
-      }
-      .spacer-sm {
-        height: 12vh;
-      }
-      .spacer-lg {
-        height: 40vh;
-      }
-      #section-5 {
-        min-height: 100dvh;
+        font-size: clamp(2.6rem, 10vw, 4rem);
       }
     }
 
@@ -293,14 +246,8 @@
 
     @media (hover: none) and (pointer: coarse) {
       #audio-toggle {
-        opacity: 0.9;
-        background: rgba(255, 255, 255, 0.25);
-        width: 3.2rem;
-        height: 3.2rem;
-      }
-      #audio-toggle svg {
-        width: 1.5rem;
-        height: 1.5rem;
+        opacity: 0.85;
+        background: rgba(255, 255, 255, 0.2);
       }
     }
 
@@ -310,7 +257,7 @@
         min-height: 100dvh;
       }
       #section-5 {
-        min-height: 100dvh;
+        min-height: 120dvh;
       }
     }
   </style>
@@ -827,9 +774,9 @@
     });
 
     // ════════════════════════════════════════
-    //  AUDIO — ambient background
-    //  HTML has muted attribute — autoplay works everywhere.
-    //  Toggle button simply flips mute state.
+    //  AUDIO — simple as hell
+    //  Stay muted until user taps the toggle button.
+    //  No auto-unmute, no retry dance, no scroll listeners.
     // ════════════════════════════════════════
 
     const bgAudio = document.getElementById('bg-audio');
@@ -837,33 +784,20 @@
     const iconOn = document.getElementById('icon-on');
     const iconOff = document.getElementById('icon-off');
 
-    // Start playing immediately (muted is on the HTML tag, so this always works)
-    bgAudio.volume = 0;
-    bgAudio.play().then(() => {
-      // Fade in volume over ~2 seconds
-      let vol = 0;
-      const fadeIn = setInterval(() => {
-        vol += 0.02;
-        if (vol >= 0.5) {
-          vol = 0.5;
-          clearInterval(fadeIn);
-        }
-        bgAudio.volume = vol;
-      }, 50);
-    }).catch(() => {});
+    // Start playing muted (muted attribute on HTML tag = works on all browsers)
+    bgAudio.play().catch(() => {});
 
-    // Show muted icon initially
+    // Show muted icon
     iconOn.style.display = 'none';
     iconOff.style.display = '';
 
-    // Toggle mute/unmute — no event listener dance needed
+    // Only unmute when user taps the button
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
 
       bgAudio.muted = !bgAudio.muted;
 
       if (bgAudio.muted) {
-        bgAudio.volume = 0;
         iconOn.style.display = 'none';
         iconOff.style.display = '';
       } else {

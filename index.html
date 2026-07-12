@@ -804,6 +804,8 @@
         bgAudio.volume = 0.5;
         iconOn.style.display = '';
         iconOff.style.display = 'none';
+        // Retry play in case iOS blocked the initial muted autoplay
+        bgAudio.play().catch(() => {});
       }
     });
 

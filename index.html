@@ -836,15 +836,22 @@
 
 
 
-    // Toggle mute/unmute
+    // Toggle mute/unmute (only toggles — first start is handled by document listeners)
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
 
-      // Ensure audio has started
+      // If audio wasn't started yet (e.g. pointerdown missed), start it
       if (!audioStarted) {
         startAudio();
+        // First interaction — keep unmuted, don't toggle
+        isMuted = false;
+        bgAudio.muted = false;
+        iconOn.style.display = '';
+        iconOff.style.display = 'none';
+        return;
       }
 
+      // Normal toggle for subsequent clicks
       isMuted = !isMuted;
       bgAudio.muted = isMuted;
 
@@ -854,7 +861,6 @@
         bgAudio.volume = 0.5;
       }
 
-      // Toggle icons
       iconOn.style.display = isMuted ? 'none' : '';
       iconOff.style.display = isMuted ? '' : 'none';
     });

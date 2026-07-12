@@ -91,6 +91,36 @@
       letter-spacing: 0.01em;
       padding-left: clamp(2rem, 10vw, 8rem);
       padding-right: 2rem;
+      /* Ensure readability over video background */
+      text-shadow: 0 1px 3px rgba(255,255,255,0.12), 0 4px 12px rgba(255,255,255,0.08);
+    }
+
+    /* Semi-transparent overlay behind text for better readability on mobile */
+    .poem-text::before {
+      content: '';
+      position: absolute;
+      top: -0.5rem;
+      left: -0.5rem;
+      right: -0.5rem;
+      bottom: -0.5rem;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(255,255,255,0.55) 0%,
+        rgba(255,255,255,0.15) 70%,
+        transparent 100%
+      );
+      border-radius: 1rem;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    /* Show overlay only on mobile where readability is worse */
+    @media (max-width: 600px) {
+      .poem-text::before {
+        opacity: 1;
+      }
     }
 
     .poem-text .line {
@@ -196,23 +226,39 @@
       min-height: 120vh;
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: 600px) {
+      .poem-section {
+        padding: 1.5rem 1rem;
+      }
       .poem-text {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
+        padding-left: 0.5rem;
+        padding-right: 1rem;
       }
       #section-1 .poem-text {
-        font-size: clamp(2.6rem, 10vw, 3.8rem);
+        font-size: clamp(2.4rem, 9vw, 3.6rem);
       }
       #s6-l2 {
-        font-size: clamp(2.6rem, 10vw, 4rem);
+        font-size: clamp(2.4rem, 9vw, 3.8rem);
+      }
+      /* Smaller spacers on mobile — too much empty scrolling */
+      .spacer {
+        height: 25vh;
+      }
+      .spacer-sm {
+        height: 12vh;
+      }
+      .spacer-lg {
+        height: 40vh;
+      }
+      #section-5 {
+        min-height: 100dvh;
       }
     }
 
     /* ── Audio Toggle Button ── */
     #audio-toggle {
       position: fixed;
-      bottom: 2rem;
+      bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
       right: 2rem;
       z-index: 100;
       width: 2.8rem;
@@ -246,8 +292,14 @@
 
     @media (hover: none) and (pointer: coarse) {
       #audio-toggle {
-        opacity: 0.85;
-        background: rgba(255, 255, 255, 0.2);
+        opacity: 0.9;
+        background: rgba(255, 255, 255, 0.25);
+        width: 3.2rem;
+        height: 3.2rem;
+      }
+      #audio-toggle svg {
+        width: 1.5rem;
+        height: 1.5rem;
       }
     }
 
@@ -257,7 +309,7 @@
         min-height: 100dvh;
       }
       #section-5 {
-        min-height: 120dvh;
+        min-height: 100dvh;
       }
     }
   </style>

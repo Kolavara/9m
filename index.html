@@ -268,7 +268,7 @@
     <source src="and.mp4" type="video/mp4" />
   </video>
 
-  <audio id="bg-audio" loop preload="auto">
+  <audio id="bg-audio" loop preload="auto" muted>
     <source src="bg-audio.mp3" type="audio/mpeg" />
   </audio>
 
@@ -775,8 +775,8 @@
 
     // ════════════════════════════════════════
     //  AUDIO — ambient background
-    //  Starts muted for browser autoplay policy.
-    //  Toggle button to unmute / mute.
+    //  HTML has muted attribute — autoplay works everywhere.
+    //  Toggle button simply flips mute state.
     // ════════════════════════════════════════
 
     const bgAudio = document.getElementById('bg-audio');
@@ -784,83 +784,40 @@
     const iconOn = document.getElementById('icon-on');
     const iconOff = document.getElementById('icon-off');
 
-    let audioStarted = false;
-    let isMuted = true;
+    // Start playing immediately (muted is on the HTML tag, so this always works)
+    bgAudio.volume = 0;
+    bgAudio.play().then(() => {
+      // Fade in volume over ~2 seconds
+      let vol = 0;
+      const fadeIn = setInterval(() => {
+        vol += 0.02;
+        if (vol >= 0.5) {
+          vol = 0.5;
+          clearInterval(fadeIn);
+        }
+        bgAudio.volume = vol;
+      }, 50);
+    }).catch(() => {});
 
-    // Start audio muted (so it can autoplay)
-    bgAudio.muted = true;
+    // Show muted icon initially
+    iconOn.style.display = 'none';
+    iconOff.style.display = '';
 
-    const startAudio = () => {
-      if (audioStarted) return;
-      bgAudio.volume = 0;
-      const playPromise = bgAudio.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            audioStarted = true;
-            // Fade in volume over ~2 seconds
-            let vol = 0;
-            const fadeIn = setInterval(() => {
-              vol += 0.02;
-              if (vol >= 0.5) {
-                vol = 0.5;
-                clearInterval(fadeIn);
-              }
-              bgAudio.volume = vol;
-            }, 50);
-          })
-          .catch(() => {
-            // play failed (e.g. mobile autoplay policy) — keep audioStarted false
-            // so the next interaction can retry
-          });
-      }
-    };
-
-    // Auto-unmute on first interaction or scroll
-    const handleInteraction = (e) => {
-      startAudio();
-      // NOTE: Don't touch mute state here — the toggle button controls that.
-      // Audio stays muted until user deliberately clicks the toggle.
-      // Clean up all listeners
-      document.removeEventListener('pointerdown', handleInteraction);
-      document.removeEventListener('touchend', handleInteraction);
-      document.removeEventListener('click', handleInteraction);
-      lenis.off('scroll', handleLenisScroll);
-    };
-
-    const handleLenisScroll = () => {
-      if (!audioStarted) handleInteraction();
-    };
-
-    // Listen on pointer down, touch end, and click (covers all devices)
-    document.addEventListener('pointerdown', handleInteraction, { once: true });
-    document.addEventListener('touchend', handleInteraction, { once: true });
-    document.addEventListener('click', handleInteraction, { once: true });
-    // Also hook into Lenis scroll (fires on wheel, touch, and programmatic scroll)
-    lenis.on('scroll', handleLenisScroll);
-
-
-
-    // Toggle mute/unmute
+    // Toggle mute/unmute — no event listener dance needed
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
 
-      // Ensure audio has started
-      if (!audioStarted) {
-        startAudio();
-      }
+      bgAudio.muted = !bgAudio.muted;
 
-      isMuted = !isMuted;
-      bgAudio.muted = isMuted;
-
-      if (isMuted) {
+      if (bgAudio.muted) {
         bgAudio.volume = 0;
+        iconOn.style.display = 'none';
+        iconOff.style.display = '';
       } else {
         bgAudio.volume = 0.5;
+        iconOn.style.display = '';
+        iconOff.style.display = 'none';
       }
-
-      iconOn.style.display = isMuted ? 'none' : '';
-      iconOff.style.display = isMuted ? '' : 'none';
     });
 
     console.log('✦ A Love Poem — scroll to begin.');
